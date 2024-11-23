@@ -1,29 +1,45 @@
 pipeline {
     agent any
     stages {
-        stage('Info') {
+        stage('Cleanup') {
             steps {
-                echo "Job: ${env.JOB_NAME} is building on branch ${env.GIT_BRANCH} and build-id is ${env.BUILD_ID}"
-                sh 'sleep 5'
+                cleanWs()
             }
         }
-        stage('Build') {
+
+        stage('Clone Git Repo') {
             steps {
-                echo "this is build stage"
-                sh 'sleep 5'
+                checkout scm
             }
         }
-        stage('Test') {
+
+        stage('Build and run docker image') {
             steps {
-                echo "this is test stage"
-                sh 'sleep 5'
+                sh 'sudo docker build -t 934372/nginx:latest .'
+                sh "sudo docker tag 934372/nginx:latest 934372/nginx:develop-${env.BUILD_ID}" 
+                sh 'sudo docker run -d -p 8081:80 934372/nginx:latest'
+            } 
+        }
+
+        stage('Build and Push') {
+            steps {
+                echo 'Building..'
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh '''
+                            sudo docker login -u ${USERNAME} -p ${PASSWORD}
+                            sudo docker push 934372/nginx:latest
+                        '''
+                        sh "sudo docker push 934372/nginx:develop-${env.BUILD_ID}"
+                    }
             }
         }
-        stage('Deploy') {
+
+        stage('testing') {
             steps {
-                echo "this is deploy stage"
-                sh 'sleep 5'
+                sh 'curl -I 192.168.219.163:8081'
             }
         }
+
+    
     }
 }
