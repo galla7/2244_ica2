@@ -36,7 +36,7 @@ pipeline {
 
         stage('testing') {
             steps {
-                sh 'curl -I 192.168.219.163:8081'
+                sh 'curl -I 3.140.208.140:8081'
             }
         }
 
