@@ -18,7 +18,7 @@ pipeline {
             steps {
                 sh 'docker build -t 934372/nginx:latest .'
                 sh "docker tag 934372/nginx:latest 934372/nginx:develop-${env.BUILD_ID}" 
-                sh 'docker run -d -p 8083:80 934372/nginx:latest'
+                sh 'docker run -d -p 8084:80 934372/nginx:latest'
             } 
         }
 
