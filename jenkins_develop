@@ -12,6 +12,11 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Clone from repository') {
+            steps {
+                git url: 'https://github.com/galla7/2244_ica2.git', branch: 'develop', credentialsId: 'gitacess'
+            }
+        }
 
         stage('Build and run docker image') {
             steps {
