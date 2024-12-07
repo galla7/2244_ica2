@@ -29,7 +29,7 @@ pipeline {
         stage('Testing') {
             steps {
                 echo 'Testing the Deployed Website'
-                sh 'curl -I '18.118.48.215:8082' 
+                sh 'curl -I 18.118.48.215:8082'
             }
         }
     }
