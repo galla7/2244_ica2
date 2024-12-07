@@ -1,28 +1,35 @@
 pipeline {
     agent any
     stages {
-        stage('Info') {
+        stage('Cleanup') {
             steps {
-                echo "Job: ${env.JOB_NAME} is building on branch ${env.GIT_BRANCH} and build-id is ${env.BUILD_ID}"
-                sh 'sleep 5'
+                cleanWs()
             }
         }
-        stage('Build') {
+
+        stage('Clone Git Repo') {
             steps {
-                echo "this is build stage"
-                sh 'sleep 5'
+                checkout scm
             }
         }
-        stage('Test') {
+
+        stage('Pull Docker Image and Deploy') {
             steps {
-                echo "this is test stage"
-                sh 'sleep 5'
+                echo 'Pulling and Running Docker Image'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-auth', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh '''
+                        docker login -u ${USERNAME} -p ${PASSWORD}
+                        docker pull 934372/nginx:latest
+                        docker run -d -p 8082:80 934372/nginx:latest
+                    '''
+                }
             }
         }
-        stage('Deploy') {
+
+        stage('Testing') {
             steps {
-                echo "this is deploy stage"
-                sh 'sleep 5'
+                echo 'Testing the Deployed Website'
+                sh 'curl -I '18.118.48.215:8082' 
             }
         }
     }
